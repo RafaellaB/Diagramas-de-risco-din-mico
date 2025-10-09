@@ -4,9 +4,9 @@ import sys
 import pandas as pd
 import requests
 from datetime import datetime
-from pytz import timezone # <-- 1. NOVA IMPORTAÇÃO
+from pytz import timezone
 
-# --- As funções obter_token, buscar_dados_cemaden, e atualizar_csv_diario continuam exatamente as mesmas ---
+# --- A função obter_token e atualizar_csv_diario continuam as mesmas ---
 
 def obter_token(email, senha):
     """Obtém o token de autenticação da API do CEMADEN."""
@@ -32,19 +32,27 @@ def obter_token(email, senha):
         return None
 
 def buscar_dados_cemaden(token, lista_estacoes, uf='PE', rede='11', sensor='10'):
+    """
+    Busca os dados e JÁ CONVERTE os horários para o fuso local de Recife.
+    """
     if not token:
         print("❌ Token de acesso não fornecido.", file=sys.stderr)
         return pd.DataFrame()
+    
     url_base = 'https://sws.cemaden.gov.br/PED/rest/pcds/pcds-dados-recentes'
     headers = {'token': token}
     lista_dfs = []
     print(f"\nBuscando dados para {len(lista_estacoes)} estações...")
+    
     for codestacao in lista_estacoes:
         params = {'codestacao': codestacao, 'uf': uf, 'rede': rede, 'sensor': sensor, 'formato': 'JSON'}
         try:
             response = requests.get(url_base, headers=headers, params=params)
             response.raise_for_status()
             dados = response.json()
+            if isinstance(dados, dict) and 'Nenhum resultado foi encontrado' in dados.get('Info', ''):
+                print(f"⚠️ Estação {codestacao} retornou uma mensagem de 'não encontrado'. Ignorando.")
+                continue
             if dados:
                 if isinstance(dados, dict):
                     dados_para_df = [dados]
@@ -55,11 +63,25 @@ def buscar_dados_cemaden(token, lista_estacoes, uf='PE', rede='11', sensor='10')
                 print(f"⚠️ Nenhum dado encontrado para a estação {codestacao}.")
         except requests.exceptions.RequestException as e:
             print(f"❌ Erro ao buscar dados para a estação {codestacao}: {e}", file=sys.stderr)
+            
     if not lista_dfs:
         print("Nenhum dado foi retornado pela API.")
         return pd.DataFrame()
+        
     print("✅ Dados obtidos com sucesso!")
     df_final = pd.concat(lista_dfs, ignore_index=True)
+
+  
+    if not df_final.empty and 'datahora' in df_final.columns:
+        print("Convertendo novos dados para o fuso horário de Recife (UTC-3)...")
+        # 1. Converte a coluna para o tipo datetime
+        df_final['datahora'] = pd.to_datetime(df_final['datahora'])
+        # 2. Informa que o fuso original é UTC e converte para o fuso de Recife
+        df_final['datahora'] = df_final['datahora'].dt.tz_localize('UTC').dt.tz_convert('America/Recife')
+        # 3. Formata de volta para texto, para salvar um CSV limpo
+        df_final['datahora'] = df_final['datahora'].dt.strftime('%Y-%m-%d %H:%M:%S')
+    
+    
     return df_final
 
 
@@ -104,14 +126,9 @@ def main():
         df_chuva_recente = buscar_dados_cemaden(token_acesso, estacoes_de_recife)
 
         if not df_chuva_recente.empty:
-            # --- 2. CORREÇÃO APLICADA AQUI ---
-            # Define o fuso horário de Recife
             tz_recife = timezone('America/Recife')
-            # Pega a data e hora atuais NESSE fuso horário
             agora_em_recife = datetime.now(tz_recife)
-            # Formata o nome do arquivo usando a data de Recife
             data_hoje = agora_em_recife.strftime('%Y-%m-%d')
-            # --- FIM DA CORREÇÃO ---
             
             nome_arquivo_diario = f"chuva_recife_{data_hoje}.csv"
             atualizar_csv_diario(df_chuva_recente, nome_arquivo_diario)
