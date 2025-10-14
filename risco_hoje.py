@@ -158,24 +158,21 @@ if __name__ == "__main__":
     col1, col2 = st.columns([1, 4])
     
     # O botão de atualização, agora garantindo a limpeza
-    if col1.button("Buscar Novos Dados (GitHub)", type="primary"):
+    if col1.button("Atualizar Dados", type="primary"):
         # Limpa o cache da função de chuva
         carregar_dados_chuva_cache.clear()
         # Força o Streamlit a reexecutar o script a partir do topo
         st.rerun() 
-        # AVISO: Se o erro persistir, o problema está na definição da função carregar_dados_chuva_cache
+        
 
-    col2.info(f"Análise de Risco para Hoje: **{data_hoje_str}** | Atualiza a cada 5 min ou com o botão.")
-
-    # Tenta carregar os dados
+   
     try:
         # Carrega a Maré (AM) - Estático
         with st.spinner("Carregando Maré..."):
              df_am = carregar_dados_mare_cache(URL_ARQUIVO_MARE_AM)
         
         # Carrega a Chuva (VP) - Dinâmico (cache de 5 min ou botão)
-        # Os argumentos para a função de cache são:
-        # url_base, data_de_hoje_str, separador, colunas_csv
+       
         df_chuva_raw = carregar_dados_chuva_cache(
             URL_BASE_CHUVAS, 
             data_hoje_str, 
