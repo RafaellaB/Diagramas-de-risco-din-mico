@@ -139,6 +139,7 @@ def gerar_diagramas(df_analisado):
         st.plotly_chart(fig, use_container_width=True, key=f"chart_{data}_{estacao}")
 
 
+
 #bloco de execução principal
 
 
@@ -152,13 +153,43 @@ if __name__ == "__main__":
     datas_para_analise = [data_hoje_str]
     estacoes_desejadas = ["Campina do Barreto", "Torreão", "RECIFE - APAC", "Imbiribeira", "Dois Irmãos"]
     
-    st.title("Diagramas de Risco Dinâmico para Alagamentos - Hoje")
+    st.title("Diagramas de Risco para Alagamentos - Hoje")
+
+    
+    st.markdown(
+      """
+    <style>
+    div.stButton > button:first-child {
+        background-color: #4F8BF9;
+        color: white;
+        border-radius: 5px;
+        outline: none;
+        box-shadow: none;
+        border: none;
+    }
+    div.stButton > button:first-child:hover {
+        background-color: #3A6FCC;
+        color: white;
+        outline: none;
+        box-shadow: none;
+        border: none;
+    }
+    div.stButton > button:first-child:focus, 
+    div.stButton > button:first-child:active {
+        color: white !important;  /* força o texto permanecer branco */
+        outline: none;
+        box-shadow: none;
+        border: none;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
 
     #botão de refresh e status
     col1, col2 = st.columns([1, 4])
     
     # O botão de atualização, agora garantindo a limpeza
-    if col1.button("Atualizar Dados", type="primary"):
+    if col1.button("Atualizar Dados"):
         # Limpa o cache da função de chuva
         carregar_dados_chuva_cache.clear()
         # Força o Streamlit a reexecutar o script a partir do topo
