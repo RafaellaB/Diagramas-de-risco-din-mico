@@ -1,58 +1,53 @@
-name: 📊 2. Cálculo e Incremento de Risco (Diário)
+# ------------------------------------------------------------
+# Workflow DESATIVADO – todo o conteúdo comentado
+# Para reativar, basta remover os "#" das linhas desejadas
+# ------------------------------------------------------------
 
-on:
-  schedule:
-    - cron: '15 3 * * *' # 
-  workflow_dispatch:
+# name: 📊 2. Cálculo e Incremento de Risco (Diário)
 
-jobs:
-  pipeline_risco_diario:
-    runs-on: ubuntu-latest
-    
-    env:
-      CEMADEN_EMAIL: ${{ secrets.CEMADEN_EMAIL }}
-      CEMADEN_SENHA: ${{ secrets.CEMADEN_SENHA }}
+# on:
+#   schedule:
+#     - cron: '15 3 * * *'
+#   workflow_dispatch:
 
-    steps:
-      - name: Checkout do Repositório de Origem
-        uses: actions/checkout@v4
-        
-      - name: Configurar Python e Instalar dependências (Completo)
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.10'
-      - run: pip install requests pandas pytz numpy 
-        
-      - name: ⚙️ Executar 'calcular_risco_cli.py' (Calcula e incrementa o histórico)
-        run: python calcular_risco_cli.py
-        
-      # --- PASSO FINAL: ENVIO DE DADOS PARA REPOSITÓRIO DE DESTINO (AUTENTICAÇÃO ROBUSTA) ---
-      - name: 🚀 Enviar 'resultado_risco_final.csv' para o Repositório do Painel
-        run: |
-          DEST_REPO="RafaellaB/Painel-Diagrama-de-Risco"
-          DEST_BRANCH="main"
-          DEST_DIR="destino_repo"
-          
-          # 1. Configura a identificação do bot
-          git config --global user.name 'GitHub Actions Bot'
-          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-
-          # 2. Constrói a URL do repositório com o Token de Acesso Pessoal (PAT)
-          # ESTA LINHA ESTÁ AGORA CORRETA E GARANTIDA DE LER A VARIÁVEL SECRETA!
-          REPO_URL="https://${{ secrets.REPO_DESTINO_TOKEN }}@github.com/${DEST_REPO}.git"
-          
-          # 3. Clona o repositório de destino usando a URL autenticada
-          git clone --single-branch --branch ${DEST_BRANCH} ${REPO_URL} ${DEST_DIR}
-          cd ${DEST_DIR}
-
-          # 4. Copia o arquivo gerado da raiz
-          cp ../resultado_risco_final.csv .
-
-          # 5. Faz o commit e push
-          git add resultado_risco_final.csv
-          
-          # O commit falha sem que o job quebre se não houver alteração
-          git commit -m "Incremento diário de risco: Adicionado dado do dia que encerrou." || exit 0
-          
-          # 6. Envia para o repositório de destino
-          git push origin ${DEST_BRANCH}
+# jobs:
+#   pipeline_risco_diario:
+#     runs-on: ubuntu-latest
+#
+#     env:
+#       CEMADEN_EMAIL: ${{ secrets.CEMADEN_EMAIL }}
+#       CEMADEN_SENHA: ${{ secrets.CEMADEN_SENHA }}
+#
+#     steps:
+#       - name: Checkout do Repositório de Origem
+#         uses: actions/checkout@v4
+#
+#       - name: Configurar Python e Instalar dependências (Completo)
+#         uses: actions/setup-python@v5
+#         with:
+#           python-version: '3.10'
+#
+#       - run: pip install requests pandas pytz numpy
+#
+#       - name: ⚙️ Executar 'calcular_risco_cli.py' (Calcula e incrementa o histórico)
+#         run: python calcular_risco_cli.py
+#
+#       - name: 🚀 Enviar 'resultado_risco_final.csv' para o Repositório do Painel
+#         run: |
+#           DEST_REPO="RafaellaB/Painel-Diagrama-de-Risco"
+#           DEST_BRANCH="main"
+#           DEST_DIR="destino_repo"
+#
+#           git config --global user.name 'GitHub Actions Bot'
+#           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+#
+#           REPO_URL="https://${{ secrets.REPO_DESTINO_TOKEN }}@github.com/${DEST_REPO}.git"
+#
+#           git clone --single-branch --branch ${DEST_BRANCH} ${REPO_URL} ${DEST_DIR}
+#           cd ${DEST_DIR}
+#
+#           cp ../resultado_risco_final.csv .
+#
+#           git add resultado_risco_final.csv
+#           git commit -m "Incremento diário de risco: Adicionado dado do dia que encerrou." || exit 0
+#           git push origin ${DEST_BRANCH}
