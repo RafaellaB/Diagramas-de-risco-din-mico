@@ -1,39 +1,43 @@
-name: 🌧️ 1. Chuva Incremental (5 em 5 min)
+# ------------------------------------------------------------
+# Workflow DESATIVADO – todo o conteúdo comentado
+# Para reativar, remova os "#" das linhas desejadas
+# ------------------------------------------------------------
 
-on:
-  schedule:
-    - cron: '*/5 * * * *'
-  workflow_dispatch:
+# name: 🌧️ 1. Chuva Incremental (5 em 5 min)
 
-jobs:
-  pipeline_chuva_incremental:
-    runs-on: ubuntu-latest
-    
-    env:
-      CEMADEN_EMAIL: ${{ secrets.CEMADEN_EMAIL }}
-      CEMADEN_SENHA: ${{ secrets.CEMADEN_SENHA }}
+# on:
+#   schedule:
+#     - cron: '*/5 * * * *'
+#   workflow_dispatch:
 
-    steps:
-      - name: Checkout do Repositório
-        uses: actions/checkout@v4
-        
-      - name: 1. Configurar Ambiente Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.10'
-          
-      - name: 2. Instalar Módulos Necessários (requests, pandas, pytz)
-       
-        run: python -m pip install requests pandas pytz
-
-      - name: Rodar script de atualização de dados
-        run: python atualizar_dados.py
-
-      - name: Fazer commit e push das alterações
-        run: |
-          git config --global user.name 'github-actions[bot]'
-          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-          git add 'chuva_recife_*.csv'
-          git reset -- 'resultado_risco_final.csv' || true
-          git commit -m "Dados de chuva atualizados automaticamente" || exit 0
-          git push
+# jobs:
+#   pipeline_chuva_incremental:
+#     runs-on: ubuntu-latest
+#
+#     env:
+#       CEMADEN_EMAIL: ${{ secrets.CEMADEN_EMAIL }}
+#       CEMADEN_SENHA: ${{ secrets.CEMADEN_SENHA }}
+#
+#     steps:
+#       - name: Checkout do Repositório
+#         uses: actions/checkout@v4
+#
+#       - name: 1. Configurar Ambiente Python
+#         uses: actions/setup-python@v5
+#         with:
+#           python-version: '3.10'
+#
+#       - name: 2. Instalar Módulos Necessários (requests, pandas, pytz)
+#         run: python -m pip install requests pandas pytz
+#
+#       - name: Rodar script de atualização de dados
+#         run: python atualizar_dados.py
+#
+#       - name: Fazer commit e push das alterações
+#         run: |
+#           git config --global user.name 'github-actions[bot]'
+#           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+#           git add 'chuva_recife_*.csv'
+#           git reset -- 'resultado_risco_final.csv' || true
+#           git commit -m "Dados de chuva atualizados automaticamente" || exit 0
+#           git push
